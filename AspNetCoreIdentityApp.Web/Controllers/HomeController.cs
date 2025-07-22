@@ -33,7 +33,7 @@ namespace AspNetCoreIdentityApp.Web.Controllers
 			}
 
 			var identityResult = await userManager.CreateAsync(new() { UserName = request.UserName, PhoneNumber = request.Phone, Email = request.Email }, request.PasswordConfirm);
-					
+
 
 			if (identityResult.Succeeded)
 			{
@@ -46,10 +46,14 @@ namespace AspNetCoreIdentityApp.Web.Controllers
 				ModelState.AddModelError(string.Empty, item.Description);
 
 			}
-
-
 			return View();
 		}
+		public IActionResult SignIn()
+		{
+			return View();
+		}
+
+
 		[ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
 		public IActionResult Error()
 		{
