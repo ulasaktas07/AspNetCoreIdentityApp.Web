@@ -76,9 +76,12 @@ namespace AspNetCoreIdentityApp.Web.Controllers
 
 
 			ModelState.AddModelErrorList(new List<string>() { $"Kullanýcý bulunamadý!",$"Baþarýsýz giriþ sayýsý={await userManager.GetAccessFailedCountAsync(hasUser)}" }); 
+			
+			return View();
+		}
 
-		
-
+		public IActionResult ResetPassword()
+		{
 			return View();
 		}
 

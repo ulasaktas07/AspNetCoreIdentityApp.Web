@@ -2,13 +2,17 @@
     ViewData["Title"] = "SignIn";
 }
 @model SignInViewModel
+@section Scripts {
+    @await Html.PartialAsync("_ValidationScriptsPartial")
+}
+
 
 <div class="row">
     <div class="col-md-4 offset-md-4">
         <h2>Kullanıcı Giriş  </h2>
         <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert">
         </div>
-        <form asp-controller="Home" asp-route-returnUrl="@Context.Request.Query["returnUrl"]"  asp-action="SignIn" method="post">
+        <form asp-controller="Home" asp-route-returnUrl="@Context.Request.Query["returnUrl"]" asp-action="SignIn" method="post">
             <div class="mb-3">
                 <label for="Email" class="form-label" asp-for="Email"></label>
                 <input class="form-control" asp-for="Email">
@@ -18,11 +22,24 @@
                 <label for="Password" class="form-label" asp-for="Password"></label>
                 <input type="password" class="form-control" asp-for="Password">
             </div>
-            <div class="mb-3 form-check">
-                <input type="checkbox" class="form-check-input" asp-for="RememberMe">
-                <label class="form-check-label" for="RememberMe" asp-for="RememberMe"></label>
+
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="mb-3 form-check">
+                        <input type="checkbox" class="form-check-input" asp-for="RememberMe">
+                        <label class="form-check-label" for="RememberMe" asp-for="RememberMe"></label>
+                    </div>
+                </div>
+                <div class="col-md-6 me-0">
+                    <div>
+                        <a class="btn btn-outline-secondary btn-sm float-end" asp-controller="Home" asp-action="ResetPassword">Şifremi Unuttum</a>
+                    </div>
+                </div>
             </div>
+
             <button type="submit" class="btn btn-primary">Üye Girişi</button>
+
+
         </form>
 
     </div>
