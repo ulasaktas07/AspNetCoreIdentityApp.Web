@@ -8,7 +8,7 @@
         <h2>Kullanıcı Giriş  </h2>
         <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert">
         </div>
-        <form asp-controller="Home" asp-action="SignIn" method="post">
+        <form asp-controller="Home" asp-route-returnUrl="@Context.Request.Query["returnUrl"]"  asp-action="SignIn" method="post">
             <div class="mb-3">
                 <label for="Email" class="form-label" asp-for="Email"></label>
                 <input class="form-control" asp-for="Email">
