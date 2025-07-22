@@ -1,16 +1,14 @@
-using System.Diagnostics;
-using System.Threading.Tasks;
+using AspNetCoreIdentityApp.Web.Extensions;
 using AspNetCoreIdentityApp.Web.Models;
 using AspNetCoreIdentityApp.Web.ViewModels;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using System.Diagnostics;
 
 namespace AspNetCoreIdentityApp.Web.Controllers
 {
-	public class HomeController(UserManager<AppUser> userManager) : Controller
+	public class HomeController(UserManager<AppUser> userManager, SignInManager<AppUser> signInManager) : Controller
 	{
-
-
 		public IActionResult Index()
 		{
 			return View();
@@ -41,15 +39,46 @@ namespace AspNetCoreIdentityApp.Web.Controllers
 				return RedirectToAction(nameof(HomeController.SignUp));
 			}
 
-			foreach (IdentityError item in identityResult.Errors)
-			{
-				ModelState.AddModelError(string.Empty, item.Description);
+			ModelState.AddModelErrorList(identityResult.Errors.Select(x => x.Description).ToList());
 
-			}
 			return View();
 		}
 		public IActionResult SignIn()
 		{
+			return View();
+		}
+
+		[HttpPost]
+		public async Task<IActionResult> SignIn(SignInViewModel model, string? returnUrl = null)
+		{
+
+			returnUrl = returnUrl ?? Url.Action("Index", "Home");
+
+			var hasUser = await userManager.FindByEmailAsync(model.Email!);
+			if (hasUser == null)
+			{
+				ModelState.AddModelError(string.Empty, "Kullanýcý bulunamadý!");
+				return View();
+			}
+
+			var signInResult = await signInManager.PasswordSignInAsync(hasUser, model.Password!, model.RememberMe, true);
+
+			if (signInResult.Succeeded)
+			{
+				return Redirect(returnUrl!);
+			}
+
+			if (signInResult.IsLockedOut)
+			{
+				ModelState.AddModelError(string.Empty, "Hesabýnýz kilitlendi. Lütfen daha sonra tekrar deneyiniz.");
+				return View();
+			}
+
+
+			ModelState.AddModelErrorList(new List<string>() { $"Kullanýcý bulunamadý!",$"Baþarýsýz giriþ sayýsý={await userManager.GetAccessFailedCountAsync(hasUser)}" }); 
+
+		
+
 			return View();
 		}
 

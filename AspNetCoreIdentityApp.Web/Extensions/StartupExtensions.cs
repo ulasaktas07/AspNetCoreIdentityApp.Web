@@ -10,14 +10,21 @@ namespace AspNetCoreIdentityApp.Web.Extensions
 		{
 			services.AddIdentity<AppUser, AppRole>(options =>
 			{
-				options.User.RequireUniqueEmail = true;
-				options.User.AllowedUserNameCharacters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-._@+?";
-				options.Password.RequiredLength = 6;
-				options.Password.RequireNonAlphanumeric = false;
-				options.Password.RequireLowercase = true;
-				options.Password.RequireUppercase = false;
-				options.Password.RequireDigit = false;
-			}).AddPasswordValidator<PasswordValidator>().AddUserValidator<UserValidator>().AddErrorDescriber<LocalizationIdentityErrorDescriber>().AddEntityFrameworkStores<AppDbContext>();
+				options.User.RequireUniqueEmail = true;// Require unique email addresses
+				options.User.AllowedUserNameCharacters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-._@+?";// Allowed characters in username
+				options.Password.RequiredLength = 6; // Minimum length of the password
+				options.Password.RequireNonAlphanumeric = false; // Require at least one non-alphanumeric character
+				options.Password.RequireLowercase = true; // Require at least one lowercase letter
+				options.Password.RequireUppercase = false; // Require at least one uppercase letter
+				options.Password.RequireDigit = false; // Require at least one digit
+
+
+				options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(3);// Default lockout time span
+				options.Lockout.MaxFailedAccessAttempts = 3;// Maximum number of failed attempts before lockout
+
+
+
+			}).AddPasswordValidator<PasswordValidator>().AddUserValidator<UserValidator>().AddErrorDescriber<LocalizationIdentityErrorDescriber>().AddEntityFrameworkStores<AppDbContext>();//
 		}
 	}
 }
