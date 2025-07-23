@@ -4,6 +4,7 @@ using AspNetCoreIdentityApp.Web.ViewModels;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;
+using System.Threading.Tasks;
 
 namespace AspNetCoreIdentityApp.Web.Controllers
 {
@@ -80,10 +81,34 @@ namespace AspNetCoreIdentityApp.Web.Controllers
 			return View();
 		}
 
-		public IActionResult ResetPassword()
+		public IActionResult ForgetPassword()
 		{
 			return View();
 		}
+
+		[HttpPost]
+		public async Task<IActionResult> ForgetPassword(ForgetPasswordViewModel request)
+		{
+			var hasUser = await userManager.FindByEmailAsync(request.Email!);
+			if (hasUser == null)
+			{
+				ModelState.AddModelError(string.Empty, "Kullanýcý bulunamadý!");
+				return View();
+			}
+
+			string passwordResetToken = await userManager.GeneratePasswordResetTokenAsync(hasUser); 
+
+			var passwordResetLink = Url.Action("ResetPassword", "Home", new { userId = hasUser.Id, token = passwordResetToken });
+
+
+			TempData["SuccessMessage"] = "Þifre yenileme baðlantýsý e-posta adresinize gönderildi. Lütfen kontrol ediniz.";
+
+			return RedirectToAction(nameof(ForgetPassword));
+
+			//yvjc foaw yhhw zvmj
+		}
+
+
 
 
 		[ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]

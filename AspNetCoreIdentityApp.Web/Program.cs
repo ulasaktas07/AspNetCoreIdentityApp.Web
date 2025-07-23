@@ -11,6 +11,9 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 {
 	options.UseSqlServer(builder.Configuration.GetConnectionString("SqlCon"));
 });
+
+
+
 builder.Services.AddIdentityWithExt();
 
 builder.Services.ConfigureApplicationCookie(opt =>

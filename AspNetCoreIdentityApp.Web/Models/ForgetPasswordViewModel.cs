@@ -2,7 +2,7 @@
 
 namespace AspNetCoreIdentityApp.Web.Models
 {
-	public class ResetPasswordViewModel
+	public class ForgetPasswordViewModel
 	{
 		[EmailAddress(ErrorMessage = "Lütfen geçerli bir email adresi giriniz")]
 
