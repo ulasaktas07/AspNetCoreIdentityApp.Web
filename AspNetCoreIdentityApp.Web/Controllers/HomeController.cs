@@ -33,7 +33,7 @@ namespace AspNetCoreIdentityApp.Web.Controllers
 				return View();
 			}
 
-			var identityResult = await userManager.CreateAsync(new() { UserName = request.UserName, PhoneNumber = request.Phone, Email = request.Email }, request.PasswordConfirm);
+			var identityResult = await userManager.CreateAsync(new() { UserName = request.UserName, PhoneNumber = request.Phone, Email = request.Email }, request.PasswordConfirm!);
 
 
 			if (identityResult.Succeeded)
@@ -42,7 +42,7 @@ namespace AspNetCoreIdentityApp.Web.Controllers
 				return RedirectToAction(nameof(HomeController.SignUp));
 			}
 
-			ModelState.AddModelErrorList(identityResult.Errors.Select(x => x.Description).ToList());
+			ModelState.AddModelErrorList([.. identityResult.Errors.Select(x => x.Description)]);
 
 			return View();
 		}
@@ -55,7 +55,7 @@ namespace AspNetCoreIdentityApp.Web.Controllers
 		public async Task<IActionResult> SignIn(SignInViewModel model, string? returnUrl = null)
 		{
 
-			returnUrl = returnUrl ?? Url.Action("Index", "Home");
+			returnUrl ??= Url.Action("Index", "Home");
 
 			var hasUser = await userManager.FindByEmailAsync(model.Email!);
 			if (hasUser == null)
@@ -78,7 +78,7 @@ namespace AspNetCoreIdentityApp.Web.Controllers
 			}
 
 
-			ModelState.AddModelErrorList(new List<string>() { $"Kullanýcý bulunamadý!", $"Baþarýsýz giriþ sayýsý={await userManager.GetAccessFailedCountAsync(hasUser)}" });
+			ModelState.AddModelErrorList([$"Kullanýcý bulunamadý!", $"Baþarýsýz giriþ sayýsý={await userManager.GetAccessFailedCountAsync(hasUser)}"]);
 
 			return View();
 		}
@@ -146,7 +146,7 @@ namespace AspNetCoreIdentityApp.Web.Controllers
 
 			else
 			{
-				ModelState.AddModelErrorList(identityResult.Errors.Select(x => x.Description).ToList());
+				ModelState.AddModelErrorList([.. identityResult.Errors.Select(x => x.Description)]);
 
 			}
 
