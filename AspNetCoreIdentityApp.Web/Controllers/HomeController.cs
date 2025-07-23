@@ -5,10 +5,11 @@ using AspNetCoreIdentityApp.Web.ViewModels;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;
+using System.Threading.Tasks;
 
 namespace AspNetCoreIdentityApp.Web.Controllers
 {
-	public class HomeController(UserManager<AppUser> userManager, SignInManager<AppUser> signInManager,IEmailService emailService)
+	public class HomeController(UserManager<AppUser> userManager, SignInManager<AppUser> signInManager, IEmailService emailService)
 		: Controller
 	{
 		public IActionResult Index()
@@ -77,8 +78,8 @@ namespace AspNetCoreIdentityApp.Web.Controllers
 			}
 
 
-			ModelState.AddModelErrorList(new List<string>() { $"Kullanýcý bulunamadý!",$"Baþarýsýz giriþ sayýsý={await userManager.GetAccessFailedCountAsync(hasUser)}" }); 
-			
+			ModelState.AddModelErrorList(new List<string>() { $"Kullanýcý bulunamadý!", $"Baþarýsýz giriþ sayýsý={await userManager.GetAccessFailedCountAsync(hasUser)}" });
+
 			return View();
 		}
 
@@ -97,9 +98,9 @@ namespace AspNetCoreIdentityApp.Web.Controllers
 				return View();
 			}
 
-			string passwordResetToken = await userManager.GeneratePasswordResetTokenAsync(hasUser); 
+			string passwordResetToken = await userManager.GeneratePasswordResetTokenAsync(hasUser);
 
-			var passwordResetLink = Url.Action("ResetPassword", "Home", new { userId = hasUser.Id, token = passwordResetToken },Request.Scheme);
+			var passwordResetLink = Url.Action("ResetPassword", "Home", new { userId = hasUser.Id, token = passwordResetToken }, Request.Scheme);
 
 			await emailService.SendResetPasswordEmail(passwordResetLink!, hasUser.Email!);
 
@@ -111,12 +112,52 @@ namespace AspNetCoreIdentityApp.Web.Controllers
 		}
 
 
-
-
-		[ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
-		public IActionResult Error()
+		public IActionResult ResetPassword(string userId, string token)
 		{
-			return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
+			TempData["UserId"] = userId;
+			TempData["Token"] = token;
+			return View();
+		}
+
+		[HttpPost]
+		public async Task<IActionResult> ResetPassword(ResetPasswordViewModel request)
+		{
+			var userId = TempData["UserId"];
+			var token = TempData["Token"];
+			if (userId == null || token == null)
+			{
+				throw new Exception("Bir hata meydana geldi!");
+			}
+
+			var hasUser = await userManager.FindByIdAsync(userId.ToString()!);
+
+			if (hasUser == null)
+			{
+				ModelState.AddModelError(string.Empty, "Kullanýcý bulunamadý!");
+				return View();
+			}
+			var identityResult = await userManager.ResetPasswordAsync(hasUser, token.ToString()!, request.Password!);
+
+			if (identityResult.Succeeded)
+			{
+				TempData["SuccessMessage"] = "Þifreniz baþarýyla yenilendi!";
+				return RedirectToAction(nameof(HomeController.SignIn));
+			}
+
+			else
+			{
+				ModelState.AddModelErrorList(identityResult.Errors.Select(x => x.Description).ToList());
+
+			}
+
+				return View();
+			}
+
+
+			[ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
+			public IActionResult Error()
+			{
+				return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
+			}
 		}
 	}
-}

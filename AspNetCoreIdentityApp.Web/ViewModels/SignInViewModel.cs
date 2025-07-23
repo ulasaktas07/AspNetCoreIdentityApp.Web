@@ -10,7 +10,7 @@ namespace AspNetCoreIdentityApp.Web.ViewModels
 		[Display(Name = "Email")]
 		public string? Email { get; set; }
 
-
+		[DataType(DataType.Password)]
 		[Required(ErrorMessage = "Şifre alanı boş bırakılamaz")]
 		[Display(Name = "Şifre")]
 		public string? Password { get; set; }
