@@ -1,14 +1,15 @@
 using AspNetCoreIdentityApp.Web.Extensions;
 using AspNetCoreIdentityApp.Web.Models;
+using AspNetCoreIdentityApp.Web.Services;
 using AspNetCoreIdentityApp.Web.ViewModels;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;
-using System.Threading.Tasks;
 
 namespace AspNetCoreIdentityApp.Web.Controllers
 {
-	public class HomeController(UserManager<AppUser> userManager, SignInManager<AppUser> signInManager) : Controller
+	public class HomeController(UserManager<AppUser> userManager, SignInManager<AppUser> signInManager,IEmailService emailService)
+		: Controller
 	{
 		public IActionResult Index()
 		{
@@ -98,14 +99,15 @@ namespace AspNetCoreIdentityApp.Web.Controllers
 
 			string passwordResetToken = await userManager.GeneratePasswordResetTokenAsync(hasUser); 
 
-			var passwordResetLink = Url.Action("ResetPassword", "Home", new { userId = hasUser.Id, token = passwordResetToken });
+			var passwordResetLink = Url.Action("ResetPassword", "Home", new { userId = hasUser.Id, token = passwordResetToken },Request.Scheme);
+
+			await emailService.SendResetPasswordEmail(passwordResetLink!, hasUser.Email!);
 
 
 			TempData["SuccessMessage"] = "Þifre yenileme baðlantýsý e-posta adresinize gönderildi. Lütfen kontrol ediniz.";
 
 			return RedirectToAction(nameof(ForgetPassword));
 
-			//yvjc foaw yhhw zvmj
 		}
 
 
