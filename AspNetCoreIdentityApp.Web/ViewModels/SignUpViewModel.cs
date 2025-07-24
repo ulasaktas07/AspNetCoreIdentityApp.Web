@@ -7,16 +7,15 @@ namespace AspNetCoreIdentityApp.Web.ViewModels
 	
 		[Required(ErrorMessage ="Kullanıcı Ad alanı boş bırakılamaz")]
 		[Display(Name ="Kullanıcı Adı")]
-		public string? UserName { get; set; }
+		public string UserName { get; set; } = null!;
 
 
 		[EmailAddress(ErrorMessage = "Lütfen geçerli bir email adresi giriniz")]
 		[Required(ErrorMessage = "Email alanı boş bırakılamaz")]
 		[Display(Name = "Email")]
-		public string? Email { get; set; }
+		public string Email { get; set; } = null!;
 
 
-		[Required(ErrorMessage = "Telefon alanı boş bırakılamaz")]
 		[Display(Name = "Telefon Numarası")]
 		public string? Phone { get; set; }
 
@@ -25,8 +24,8 @@ namespace AspNetCoreIdentityApp.Web.ViewModels
 		[Required(ErrorMessage = "Şifre alanı boş bırakılamaz")]
 		[Display(Name = "Şifre")]
 		[MinLength(6, ErrorMessage = "Şifre en az 6 karakter olmalıdır.")] // Optional: Minimum length validation
-		public string? Password { get; set; }
-		
+		public string Password { get; set; } = null!;
+
 
 
 		[DataType(DataType.Password)]
@@ -35,6 +34,6 @@ namespace AspNetCoreIdentityApp.Web.ViewModels
 		[Display(Name = "Şifre Tekrar")]
 		[MinLength(6, ErrorMessage = "Şifre en az 6 karakter olmalıdır.")] // Optional: Minimum length validation
 
-		public string? PasswordConfirm { get; set; }
+		public string PasswordConfirm { get; set; } = null!;
 	}
 }

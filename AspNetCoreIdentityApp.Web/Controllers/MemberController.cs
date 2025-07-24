@@ -4,12 +4,13 @@ using AspNetCoreIdentityApp.Web.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using System.Threading.Tasks;
 
 namespace AspNetCoreIdentityApp.Web.Controllers
 {
 	[Authorize]
-	public class MemberController(SignInManager<AppUser> signInManager,UserManager<AppUser> userManager) : Controller
+	public class MemberController(SignInManager<AppUser> signInManager, UserManager<AppUser> userManager) : Controller
 	{
 		public async Task<IActionResult> Index()
 		{
@@ -28,7 +29,7 @@ namespace AspNetCoreIdentityApp.Web.Controllers
 		}
 		public IActionResult PasswordChange()
 		{
-			
+
 			return View();
 		}
 		[HttpPost]
@@ -51,7 +52,7 @@ namespace AspNetCoreIdentityApp.Web.Controllers
 
 			if (!result.Succeeded)
 			{
-				ModelState.AddModelErrorList([.. result.Errors.Select(x=>x.Description)]);
+				ModelState.AddModelErrorList([.. result.Errors.Select(x => x.Description)]);
 				return View();
 			}
 
@@ -62,6 +63,23 @@ namespace AspNetCoreIdentityApp.Web.Controllers
 			TempData["SuccessMessage"] = "Şifreniz başarıyla değiştirildi.";
 
 			return View();
+		}
+
+		public async Task<IActionResult> UserEdit()
+		{
+			ViewBag.genderList = new SelectList(Enum.GetNames<Gender>());
+			var currentUser = await userManager.FindByNameAsync(User.Identity!.Name!);
+			var userEditViewModel = new UserEditViewModel
+			{
+				UserName = currentUser!.UserName!,
+				Email = currentUser.Email!,
+				Phone = currentUser.PhoneNumber,
+				City = currentUser.City,
+				BirthDate = currentUser.BirthDate,
+				Gender = currentUser.Gender
+			};
+			return View(userEditViewModel);
+
 		}
 	}
 }
