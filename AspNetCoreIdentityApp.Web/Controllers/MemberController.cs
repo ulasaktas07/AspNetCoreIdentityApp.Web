@@ -20,7 +20,8 @@ namespace AspNetCoreIdentityApp.Web.Controllers
 			{
 				UserName = currentUser!.UserName,
 				Email = currentUser.Email,
-				PhoneNumber = currentUser.PhoneNumber
+				PhoneNumber = currentUser.PhoneNumber,
+				PictureUrl=currentUser.Picture
 			};
 			return View(userViewModel);
 		}
@@ -105,7 +106,7 @@ namespace AspNetCoreIdentityApp.Web.Controllers
 			if (request.Picture != null && request.Picture.Length > 0)
 			{
 				var wwwrootFolder = fileProvider.GetDirectoryContents("wwwroot");
-				var randomFileName = $"{Guid.NewGuid().ToString()}{Path.GetExtension(request.Picture.FileName)}";
+				var randomFileName = $"{Guid.NewGuid()}{Path.GetExtension(request.Picture.FileName)}";
 
 				var newPicturePath = Path.Combine(wwwrootFolder.First(x=>x.Name=="userspicture").PhysicalPath!, randomFileName);
 				

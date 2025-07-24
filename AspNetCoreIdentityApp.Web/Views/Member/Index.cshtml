@@ -4,9 +4,15 @@
 @model UserViewModel
 
 <div class="row">
-    <div class="col-md-6 offset-md-3">
-        <h1>Kullanıcı Bilgileri</h1>
+    <div class="col-md-4 offset-md-4">
+      
+        <user-picture-thumbnail picture-url="@Model.PictureUrl"></user-picture-thumbnail>
+    </div>
+</div>
 
+<div class="row">
+    <div class="col-md-5 offset-md-4  ">
+        <h1>Kullanıcı Bilgileri</h1>
         <table class="table">
             <thead>
                 <tr>
@@ -15,7 +21,7 @@
                     <th>Telefon No</th>
                 </tr>
             </thead>
-            <tbody>
+            <tbody> 
                 <tr>
                     <td>@Model.UserName</td>
                     <td>@Model.Email</td>
