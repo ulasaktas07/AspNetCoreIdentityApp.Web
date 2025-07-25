@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 namespace AspNetCoreIdentityApp.Web.Controllers
 {
 	[Authorize]
-	public class MemberController(SignInManager<AppUser> signInManager, UserManager<AppUser> userManager,IFileProvider fileProvider) : Controller
+	public class MemberController(SignInManager<AppUser> signInManager, UserManager<AppUser> userManager, IFileProvider fileProvider) : Controller
 	{
 		public async Task<IActionResult> Index()
 		{
@@ -21,7 +21,7 @@ namespace AspNetCoreIdentityApp.Web.Controllers
 				UserName = currentUser!.UserName,
 				Email = currentUser.Email,
 				PhoneNumber = currentUser.PhoneNumber,
-				PictureUrl=currentUser.Picture
+				PictureUrl = currentUser.Picture
 			};
 			return View(userViewModel);
 		}
@@ -108,8 +108,8 @@ namespace AspNetCoreIdentityApp.Web.Controllers
 				var wwwrootFolder = fileProvider.GetDirectoryContents("wwwroot");
 				var randomFileName = $"{Guid.NewGuid()}{Path.GetExtension(request.Picture.FileName)}";
 
-				var newPicturePath = Path.Combine(wwwrootFolder.First(x=>x.Name=="userspicture").PhysicalPath!, randomFileName);
-				
+				var newPicturePath = Path.Combine(wwwrootFolder.First(x => x.Name == "userspicture").PhysicalPath!, randomFileName);
+
 				using var stream = new FileStream(newPicturePath, FileMode.Create);
 
 				await request.Picture.CopyToAsync(stream);
@@ -118,7 +118,7 @@ namespace AspNetCoreIdentityApp.Web.Controllers
 
 
 			}
-			var updateToUserResult= await userManager.UpdateAsync(currentUser!);
+			var updateToUserResult = await userManager.UpdateAsync(currentUser!);
 
 			if (!updateToUserResult.Succeeded)
 			{
@@ -144,6 +144,17 @@ namespace AspNetCoreIdentityApp.Web.Controllers
 			};
 
 			return View(userEditViewModel);
+		}
+
+		public async Task<IActionResult> AccessDenied(string ReturnUrl)
+		{
+			string message = string.Empty;
+
+			message= "Bu sayfaya erişim izniniz bulunmamaktadır."; 
+
+			ViewBag.message = message;
+
+			return View();
 		}
 	}
 }

@@ -37,6 +37,7 @@ builder.Services.ConfigureApplicationCookie(opt =>
 	};
 	opt.LoginPath = new PathString("/Home/SignIn");
 	opt.LogoutPath= new PathString("/Member/Logout");
+	opt.AccessDeniedPath = new PathString("/Member/AccessDenied");
 	opt.Cookie = cookieBuilder;
 	opt.ExpireTimeSpan = TimeSpan.FromDays(60);
 	opt.SlidingExpiration = true; 
