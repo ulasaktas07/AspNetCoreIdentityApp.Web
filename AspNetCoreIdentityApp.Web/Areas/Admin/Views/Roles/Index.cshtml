@@ -1,9 +1,49 @@
-﻿
-@{
+﻿@{
     ViewData["Title"] = "Index";
 }
+@model List<AdminModel.RoleViewModel>
 
 
-<a class="btn btn-primary" asp-controller="Roles" asp-action="RoleCreate" asp-area="Admin">Rol Ekle</a>
-<h1>Index</h1>
+<div class="row">
+    <div class="col-md-6 offset-md-2">
+        <h2>Roller</h2>
+    </div>
+    <div class="col-md-2">
+        <a class="btn btn-primary" asp-controller="Roles" asp-action="RoleCreate" asp-area="Admin">Rol Ekle</a>
+
+    </div>
+
+</div>
+
+<div class="row">
+    <div class="col-md-8 offset-md-2">
+        @if (TempData["SuccessMessage"] != null)
+        {
+            <div class="alert alert-info" role="alert">
+                @TempData["SuccessMessage"]
+            </div>
+        }
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Rol İsmi</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var user in Model)
+                {
+                    <tr>
+                        <td>@user.Id</td>
+                        <td>@user.Name</td>
+                        <td><a class="btn btn-success btn-sm" asp-area="Admin" asp-controller="Roles" asp-action="RoleUpdate" asp-route-id="@user.Id">Güncelle</a></td>
+                        <td><a class="btn btn-danger btn-sm" asp-area="Admin" asp-controller="Roles" asp-action="RoleDelete" asp-route-id="@user.Id">Sil</a></td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
 
