@@ -10,7 +10,7 @@ namespace AspNetCoreIdentityApp.Web.Areas.Admin.Controllers
 {
 	[Area("Admin")]
 
-	public class RolesController( RoleManager<AppRole> roleManager) : Controller
+	public class RolesController(UserManager<AppUser> userManager, RoleManager<AppRole> roleManager) : Controller
 	{
 		public async Task<IActionResult> Index()
 		{
@@ -58,7 +58,7 @@ namespace AspNetCoreIdentityApp.Web.Areas.Admin.Controllers
 			var role = await roleManager.FindByIdAsync(request.Id) ?? throw new Exception("Rol bulunamadı");
 			role!.Name = request.Name;
 			var result = await roleManager.UpdateAsync(role);
-		
+
 			if (!result.Succeeded)
 			{
 				ModelState.AddModelErrorList(result.Errors);
@@ -74,12 +74,65 @@ namespace AspNetCoreIdentityApp.Web.Areas.Admin.Controllers
 			var result = await roleManager.DeleteAsync(roleDelete);
 			if (!result.Succeeded)
 			{
-				throw new Exception(result.Errors.Select(x=>x.Description).First());
+				throw new Exception(result.Errors.Select(x => x.Description).First());
 			}
 
 			TempData["SuccessMessage"] = "Rol başarıyla silindi.";
 
 			return RedirectToAction(nameof(RolesController.Index));
+		}
+
+		public async Task<IActionResult> AssignRoleToUser(string id)
+		{
+			var user = await userManager.FindByIdAsync(id) ?? throw new Exception("Kullanıcı bulunamadı");
+
+			ViewBag.userId = id;
+
+			var roles = await roleManager.Roles.ToListAsync();
+
+			var userRoles = await userManager.GetRolesAsync(user);
+
+			var roleViewModelList = new List<AssignRoleToUserViewModel>();
+
+
+			foreach (var role in roles)
+			{
+				var assignRoleToUserViewModel = new AssignRoleToUserViewModel
+				{
+					Id = role.Id,
+					Name = role.Name!
+				};
+				if (userRoles.Contains(role.Name!))
+				{
+					assignRoleToUserViewModel.Exist = true;
+				}
+				roleViewModelList.Add(assignRoleToUserViewModel);
+
+			}
+
+			return View(roleViewModelList);
+		}
+		[HttpPost]
+		public async Task<IActionResult> AssignRoleToUser(string userId, List<AssignRoleToUserViewModel> request)
+		{
+
+			var userToAssignRoles = await userManager.FindByIdAsync(userId);
+
+			foreach (var role in request)
+			{
+				if (role.Exist)
+				{
+					var result = await userManager.AddToRoleAsync(userToAssignRoles!, role.Name);
+				}
+				else
+				{
+					var result = await userManager.RemoveFromRoleAsync(userToAssignRoles!, role.Name);
+
+				}
+
+			}
+			return RedirectToAction(nameof(HomeController.UserList),"Home");
+
 		}
 	}
 }
