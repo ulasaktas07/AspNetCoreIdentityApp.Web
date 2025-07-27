@@ -5,6 +5,7 @@ using AspNetCoreIdentityApp.Web.ViewModels;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;
+using System.Security.Claims;
 using System.Threading.Tasks;
 
 namespace AspNetCoreIdentityApp.Web.Controllers
@@ -35,16 +36,29 @@ namespace AspNetCoreIdentityApp.Web.Controllers
 
 			var identityResult = await userManager.CreateAsync(new() { UserName = request.UserName, PhoneNumber = request.Phone, Email = request.Email }, request.PasswordConfirm!);
 
-
-			if (identityResult.Succeeded)
+			if (!identityResult.Succeeded)
 			{
-				TempData["SuccessMessage"] = "Kayýt baþarýlý!";
-				return RedirectToAction(nameof(HomeController.SignUp));
+				ModelState.AddModelErrorList([.. identityResult.Errors.Select(x => x.Description)]);
+				return View();
 			}
 
-			ModelState.AddModelErrorList([.. identityResult.Errors.Select(x => x.Description)]);
+			var exchangeExpireClaim = new Claim("ExchangeExpireDate", DateTime.Now.AddDays(10).ToString());
 
-			return View();
+			var user = await userManager.FindByNameAsync(request.UserName!);
+
+			var claimResult = await userManager.AddClaimAsync(user!, exchangeExpireClaim);
+
+			if (!claimResult.Succeeded)
+			{
+				ModelState.AddModelErrorList([.. claimResult.Errors.Select(x => x.Description)]);
+				return View();
+			}
+
+			TempData["SuccessMessage"] = "Kayýt baþarýlý!";
+			return RedirectToAction(nameof(HomeController.SignUp));
+
+
+
 		}
 		public IActionResult SignIn()
 		{
@@ -67,13 +81,9 @@ namespace AspNetCoreIdentityApp.Web.Controllers
 				ModelState.AddModelError(string.Empty, "Kullanýcý bulunamadý!");
 				return View();
 			}
+						
 
 			var signInResult = await signInManager.PasswordSignInAsync(hasUser, model.Password!, model.RememberMe, true);
-
-			if (signInResult.Succeeded)
-			{
-				return Redirect(returnUrl!);
-			}
 
 			if (signInResult.IsLockedOut)
 			{
@@ -81,10 +91,23 @@ namespace AspNetCoreIdentityApp.Web.Controllers
 				return View();
 			}
 
+			if (!signInResult.Succeeded)
+			{
+				ModelState.AddModelErrorList([$"Kullanýcý bulunamadý!", $"Baþarýsýz giriþ sayýsý={await userManager.GetAccessFailedCountAsync(hasUser)}"]); 
+				return View();
 
-			ModelState.AddModelErrorList([$"Kullanýcý bulunamadý!", $"Baþarýsýz giriþ sayýsý={await userManager.GetAccessFailedCountAsync(hasUser)}"]);
+			}
 
-			return View();
+
+			if (hasUser.BirthDate.HasValue)
+			{
+				await signInManager.SignInWithClaimsAsync(hasUser, model.RememberMe, [new Claim("birthdate", hasUser.BirthDate.Value.ToString())]);
+			}
+
+
+			return Redirect(returnUrl!);
+
+
 		}
 
 		public IActionResult ForgetPassword()
@@ -154,14 +177,14 @@ namespace AspNetCoreIdentityApp.Web.Controllers
 
 			}
 
-				return View();
-			}
+			return View();
+		}
 
 
-			[ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
-			public IActionResult Error()
-			{
-				return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
-			}
+		[ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
+		public IActionResult Error()
+		{
+			return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
 		}
 	}
+}

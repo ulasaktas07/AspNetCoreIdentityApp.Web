@@ -6,6 +6,8 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.Extensions.FileProviders;
+using System.Collections.Generic;
+using System.Security.Claims;
 using System.Threading.Tasks;
 
 namespace AspNetCoreIdentityApp.Web.Controllers
@@ -128,7 +130,17 @@ namespace AspNetCoreIdentityApp.Web.Controllers
 
 			await userManager.UpdateSecurityStampAsync(currentUser!);
 			await signInManager.SignOutAsync();
-			await signInManager.SignInAsync(currentUser!, true);
+
+			if (request.BirthDate.HasValue)
+			{
+				await signInManager.SignInWithClaimsAsync(currentUser!, true, [new Claim("birthdate", currentUser.BirthDate!.Value.ToString())]);
+
+			}
+			else
+			{
+				await signInManager.SignInAsync(currentUser!, true);
+			}
+	
 
 			TempData["SuccessMessage"] = "Kullanıcı bilgileri başarıyla güncellendi.";
 
@@ -146,9 +158,29 @@ namespace AspNetCoreIdentityApp.Web.Controllers
 			return View(userEditViewModel);
 		}
 
-		public async Task<IActionResult> AccessDenied(string ReturnUrl)
+
+		[Authorize(Policy = "RizePolicy")]
+		public IActionResult RizePage()
 		{
-			string message = string.Empty;
+			return View();
+		}
+
+		[Authorize(Policy = "ExchangeExpirePolicy")]
+		public IActionResult ExchangePage()
+		{
+			return View();
+		}
+
+		[Authorize(Policy = "ViolencePolicy")]
+		public IActionResult ViolencePage()
+		{
+			return View();
+		}
+
+		public IActionResult AccessDenied(string ReturnUrl)
+		{
+			string empty = string.Empty;
+			string message = empty;
 
 			message= "Bu sayfaya erişim izniniz bulunmamaktadır."; 
 
@@ -156,5 +188,6 @@ namespace AspNetCoreIdentityApp.Web.Controllers
 
 			return View();
 		}
+
 	}
 }
